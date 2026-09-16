@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class EmpleadoDAO {
-    private final String URL = "jdbc:mysql://localhost:3306/gestion_empleados?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+	private final String URL = "jdbc:mysql://localhost:3306/bd_empleados?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
     private final String USER = "root";
     private final String PASSWORD = "J3ff3rs0n..."; 
 
