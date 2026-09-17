@@ -86,37 +86,43 @@ public class VentanaPrincipal extends JFrame {
         JButton btnNuevo = crearBotonEstilizado("Nuevo", new Color(16, 185, 129), new Color(52, 211, 153));     
         JButton btnEditar = crearBotonEstilizado("Editar", new Color(14, 165, 233), new Color(56, 189, 248));     
         JButton btnEliminar = crearBotonEstilizado("Eliminar", new Color(225, 29, 72), new Color(244, 63, 94));   
-        JButton btnActualizar = crearBotonEstilizado("Actualizar", new Color(79, 70, 229), new Color(99, 102, 241)); 
 
         panelSur.add(btnNuevo);
         panelSur.add(btnEditar);
         panelSur.add(btnEliminar);
-        panelSur.add(btnActualizar);
 
         // --- ACCIONES DE LOS BOTONES ---
 
-        // 1. Actualizar tabla desde la BD
-        btnActualizar.addActionListener(e -> cargarEmpleadosDesdeBD());
-        
-        // 2. Botón Nuevo (Placeholder para abrir formulario de registro)
+        // 1. Botón Nuevo (Abre formulario de registro)
         btnNuevo.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Aquí abrirás tu formulario para registrar un nuevo empleado.");
-            cargarEmpleadosDesdeBD(); // Refrescar después de crear
+            FormularioEmpleado form = new FormularioEmpleado(this, empleadoDAO, null);
+            form.setVisible(true);
         });
 
-        // 3. Botón Editar (Validando selección)
+        // 2. Botón Editar (Abre el formulario con los datos del empleado seleccionado)
         btnEditar.addActionListener(e -> {
             int filaSeleccionada = tableEmpleados.getSelectedRow();
             if (filaSeleccionada == -1) {
                 JOptionPane.showMessageDialog(this, "Por favor seleccione un empleado de la tabla para editar.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            int idEmpleado = (int) tableModel.getValueAt(filaSeleccionada, 0);
-            JOptionPane.showMessageDialog(this, "Editar empleado con ID: " + idEmpleado);
-            cargarEmpleadosDesdeBD(); // Refrescar después de editar
+
+            int id = (int) tableModel.getValueAt(filaSeleccionada, 0);
+            String nombre = (String) tableModel.getValueAt(filaSeleccionada, 1);
+            String depto = (String) tableModel.getValueAt(filaSeleccionada, 2);
+            double salario = Double.parseDouble(tableModel.getValueAt(filaSeleccionada, 3).toString());
+            String fecha = (String) tableModel.getValueAt(filaSeleccionada, 4);
+            boolean activo = tableModel.getValueAt(filaSeleccionada, 5).toString().equals("Activo");
+
+            // Creamos la instancia del objeto empleado con los datos de la fila
+            Empleado empSeleccionado = new Empleado(id, nombre, depto, salario, fecha, activo);
+
+            // Abrimos el formulario en modo edición
+            FormularioEmpleado form = new FormularioEmpleado(this, empleadoDAO, empSeleccionado);
+            form.setVisible(true);
         });
 
-        // 4. Botón Eliminar (Con confirmación y manejo de errores por JDBC sin crash)
+        // 3. Botón Eliminar (Con confirmación y manejo de errores por JDBC sin crash)
         btnEliminar.addActionListener(e -> {
             int filaSeleccionada = tableEmpleados.getSelectedRow();
             if (filaSeleccionada == -1) {
@@ -183,7 +189,7 @@ public class VentanaPrincipal extends JFrame {
     }
 
     // Método para consultar al DAO y poblar la JTable con los datos de MySQL
-    private void cargarEmpleadosDesdeBD() {
+    public void cargarEmpleadosDesdeBD() {
         tableModel.setRowCount(0); // Limpiar tabla actual
         try {
             List<Empleado> lista = empleadoDAO.listarTodos();
