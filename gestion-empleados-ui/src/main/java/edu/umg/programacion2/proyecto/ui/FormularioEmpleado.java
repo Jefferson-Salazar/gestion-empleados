@@ -4,6 +4,7 @@ import edu.umg.programacion2.modelo.Empleado;
 import edu.umg.programacion2.dao.EmpleadoDAO;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -28,39 +29,88 @@ public class FormularioEmpleado extends JFrame {
         this.empleadoDAO = dao;
         this.empleadoEditando = empleado;
 
-        setSize(420, 380);
+        setSize(450, 400);
         setLocationRelativeTo(parent);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(new GridLayout(6, 2, 10, 10));
+        
+        // --- ESTILO OSCURO PARA EL FORMULARIO ---
+        // Panel principal con borde y color de fondo oscuro
+        JPanel panelPrincipal = new JPanel();
+        panelPrincipal.setLayout(new GridLayout(6, 2, 10, 15));
+        panelPrincipal.setBackground(new Color(17, 24, 39)); // Mismo fondo que la tabla
+        panelPrincipal.setBorder(new EmptyBorder(20, 20, 20, 20));
+        setContentPane(panelPrincipal);
 
-        // Componentes del formulario
-        add(new JLabel(" Nombre Completo:"));
+        // Método auxiliar para crear etiquetas blancas
+        JLabel lblNombre = crearEtiquetaBlanca(" Nombre Completo:");
+        panelPrincipal.add(lblNombre);
         txtNombre = new JTextField();
-        add(txtNombre);
+        txtNombre.setBackground(new Color(31, 41, 55));
+        txtNombre.setForeground(Color.WHITE);
+        txtNombre.setCaretColor(Color.WHITE);
+        txtNombre.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(55, 65, 81)),
+                BorderFactory.createEmptyBorder(5, 8, 5, 8)
+        ));
+        panelPrincipal.add(txtNombre);
 
-        add(new JLabel(" Departamento:"));
+        JLabel lblDepto = crearEtiquetaBlanca(" Departamento:");
+        panelPrincipal.add(lblDepto);
         String[] departamentos = {"Ventas", "Sistemas", "Contabilidad", "Recursos Humanos", "Administración"};
         cmbDepartamento = new JComboBox<>(departamentos);
-        add(cmbDepartamento);
+        cmbDepartamento.setEditable(true); // Hace que se pueda escribir texto libre
+        cmbDepartamento.setBackground(new Color(31, 41, 55));
+        cmbDepartamento.setForeground(Color.WHITE);
+        panelPrincipal.add(cmbDepartamento);
 
-        add(new JLabel(" Salario Mensual (Q):"));
+        JLabel lblSalario = crearEtiquetaBlanca(" Salario Mensual (Q):");
+        panelPrincipal.add(lblSalario);
         txtSalario = new JTextField();
-        add(txtSalario);
+        txtSalario.setBackground(new Color(31, 41, 55));
+        txtSalario.setForeground(Color.WHITE);
+        txtSalario.setCaretColor(Color.WHITE);
+        txtSalario.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(55, 65, 81)),
+                BorderFactory.createEmptyBorder(5, 8, 5, 8)
+        ));
+        panelPrincipal.add(txtSalario);
 
-        add(new JLabel(" Contratación (YYYY-MM-DD):"));
+        JLabel lblFecha = crearEtiquetaBlanca(" Contratación (YYYY-MM-DD):");
+        panelPrincipal.add(lblFecha);
         txtFecha = new JTextField();
-        add(txtFecha);
+        txtFecha.setBackground(new Color(31, 41, 55));
+        txtFecha.setForeground(Color.WHITE);
+        txtFecha.setCaretColor(Color.WHITE);
+        txtFecha.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(55, 65, 81)),
+                BorderFactory.createEmptyBorder(5, 8, 5, 8)
+        ));
+        panelPrincipal.add(txtFecha);
 
-        add(new JLabel(" ¿Activo?"));
+        JLabel lblActivo = crearEtiquetaBlanca(" ¿Activo?");
+        panelPrincipal.add(lblActivo);
         chkActivo = new JCheckBox();
         chkActivo.setSelected(true);
-        add(chkActivo);
+        chkActivo.setBackground(new Color(17, 24, 39)); // Fondo oscuro para que se funda
+        chkActivo.setForeground(Color.WHITE);
+        panelPrincipal.add(chkActivo);
 
+        // Estilo del botón Guardar (parecido al botón Nuevo)
         btnGuardar = new JButton("Guardar");
-        add(new JLabel()); // Espacio vacío para alinear
-        add(btnGuardar);
+        btnGuardar.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnGuardar.setBackground(new Color(16, 185, 129));
+        btnGuardar.setForeground(Color.WHITE);
+        btnGuardar.setFocusPainted(false);
+        btnGuardar.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(255, 255, 255, 25), 1),
+                BorderFactory.createEmptyBorder(10, 22, 10, 22)
+        ));
+        btnGuardar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        panelPrincipal.add(new JLabel()); // Espacio vacío para alinear
+        panelPrincipal.add(btnGuardar);
 
-        // Si estamos editando, rellenamos los campos y seleccionamos su departamento
+        // Si estamos editando, rellenamos los campos
         if (empleadoEditando != null) {
             txtNombre.setText(empleadoEditando.getNombreCompleto());
             cmbDepartamento.setSelectedItem(empleadoEditando.getDepartamento());
@@ -73,16 +123,25 @@ public class FormularioEmpleado extends JFrame {
         btnGuardar.addActionListener(e -> guardarDatos());
     }
 
+    // Método auxiliar para no repetir código de estilo en los JLabel
+    private JLabel crearEtiquetaBlanca(String texto) {
+        JLabel label = new JLabel(texto);
+        label.setForeground(new Color(229, 231, 235));
+        label.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        return label;
+    }
+
     private void guardarDatos() {
         try {
             String nombre = txtNombre.getText().trim();
-            String depto = (String) cmbDepartamento.getSelectedItem();
+            // Obtenemos el texto del JComboBox, ya sea seleccionado o escrito
+            String depto = cmbDepartamento.getSelectedItem() != null ? cmbDepartamento.getSelectedItem().toString().trim() : "";
             String salarioStr = txtSalario.getText().trim();
             String fechaStr = txtFecha.getText().trim();
             boolean activo = chkActivo.isSelected();
 
             // 1. Validaciones previas
-            if (nombre.isEmpty() || salarioStr.isEmpty() || fechaStr.isEmpty()) {
+            if (nombre.isEmpty() || depto.isEmpty() || salarioStr.isEmpty() || fechaStr.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios.", "Validación", JOptionPane.WARNING_MESSAGE);
                 return;
             }
