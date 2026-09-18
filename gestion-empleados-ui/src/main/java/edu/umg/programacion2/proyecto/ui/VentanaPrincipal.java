@@ -16,17 +16,17 @@ public class VentanaPrincipal extends JFrame {
     private JTable tableEmpleados;
     private DefaultTableModel tableModel;
     
-    // Instancia del DAO de tu módulo -core
+    // Instancia del DAO para comunicarnos con la base de datos
     private EmpleadoDAO empleadoDAO;
 
     public VentanaPrincipal() {
         empleadoDAO = new EmpleadoDAO();
 
-        // Configuración de la ventana principal
+        // Configuración inicial de la ventana
         setTitle("Gestión de Empleados");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 1050, 650);
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(null); // Centrar la ventana en la pantalla
 
         // Panel principal 
         contentPane = new JPanel();
@@ -47,7 +47,7 @@ public class VentanaPrincipal extends JFrame {
         lblTitulo.setForeground(new Color(241, 245, 249)); 
         panelNorte.add(lblTitulo);
 
-        // TABLA
+        // TABLA: Definimos columnas y evitamos que se puedan editar directamente haciendo clic en las celdas
         String[] columnas = {"ID", "Nombre Completo", "Departamento", "Salario (Q)", "Contratación", "Estado"};
         tableModel = new DefaultTableModel(columnas, 0) {
             @Override
@@ -56,6 +56,7 @@ public class VentanaPrincipal extends JFrame {
             }
         };
         
+        // Estilos visuales de la tabla 
         tableEmpleados = new JTable(tableModel);
         tableEmpleados.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         tableEmpleados.setRowHeight(34);
@@ -71,12 +72,13 @@ public class VentanaPrincipal extends JFrame {
         tableEmpleados.getTableHeader().setForeground(new Color(156, 163, 175));
         tableEmpleados.getTableHeader().setOpaque(false);
 
+        // Metemos la tabla dentro de un ScrollPane por si la lista es muy larga
         JScrollPane scrollPane = new JScrollPane(tableEmpleados);
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(31, 41, 55)));
         scrollPane.getViewport().setBackground(new Color(17, 24, 39));
         contentPane.add(scrollPane, BorderLayout.CENTER);
 
-        //BOTONES 
+        // BOTONES (Panel inferior)
         JPanel panelSur = new JPanel();
         panelSur.setBackground(new Color(11, 15, 25));
         panelSur.setBorder(new EmptyBorder(18, 0, 0, 0));
@@ -85,21 +87,21 @@ public class VentanaPrincipal extends JFrame {
 
         JButton btnNuevo = crearBotonEstilizado("Nuevo", new Color(16, 185, 129), new Color(52, 211, 153));     
         JButton btnEditar = crearBotonEstilizado("Editar", new Color(14, 165, 233), new Color(56, 189, 248));     
-        JButton btnEliminar = crearBotonEstilizado("Eliminar", new Color(225, 29, 72), new Color(244, 63, 94));   
+        JButton btnEliminar = crearBotonEstilizado("Eliminar", new Color(225, 29, 72), new Color(244, 63, 94));    
 
         panelSur.add(btnNuevo);
         panelSur.add(btnEditar);
         panelSur.add(btnEliminar);
 
-        // --- ACCIONES DE LOS BOTONES ---
+        // ACCIONES DE LOS BOTONES
 
-        // 1. Botón Nuevo (Abre formulario de registro)
+        // 1. Botón Nuevo: Abre el formulario vacío para registrar un empleado
         btnNuevo.addActionListener(e -> {
             FormularioEmpleado form = new FormularioEmpleado(this, empleadoDAO, null);
             form.setVisible(true);
         });
 
-        // 2. Botón Editar (Abre el formulario con los datos del empleado seleccionado)
+        // 2. Botón Editar: Saca los datos de la fila seleccionada y los pasa al formulario
         btnEditar.addActionListener(e -> {
             int filaSeleccionada = tableEmpleados.getSelectedRow();
             if (filaSeleccionada == -1) {
@@ -107,6 +109,7 @@ public class VentanaPrincipal extends JFrame {
                 return;
             }
 
+            // Capturamos los valores de cada columna de la fila seleccionada
             int id = (int) tableModel.getValueAt(filaSeleccionada, 0);
             String nombre = (String) tableModel.getValueAt(filaSeleccionada, 1);
             String depto = (String) tableModel.getValueAt(filaSeleccionada, 2);
@@ -114,15 +117,15 @@ public class VentanaPrincipal extends JFrame {
             String fecha = (String) tableModel.getValueAt(filaSeleccionada, 4);
             boolean activo = tableModel.getValueAt(filaSeleccionada, 5).toString().equals("Activo");
 
-            // Creamos la instancia del objeto empleado con los datos de la fila
+            // Creamos el objeto con esos datos
             Empleado empSeleccionado = new Empleado(id, nombre, depto, salario, fecha, activo);
 
-            // Abrimos el formulario en modo edición
+            // Abrimos el formulario pero pasándole el empleado (modo edición)
             FormularioEmpleado form = new FormularioEmpleado(this, empleadoDAO, empSeleccionado);
             form.setVisible(true);
         });
 
-        // 3. Botón Eliminar (Con confirmación y manejo de errores por JDBC sin crash)
+        // 3. Botón Eliminar: Pide confirmación y borra el registro usando el DAO
         btnEliminar.addActionListener(e -> {
             int filaSeleccionada = tableEmpleados.getSelectedRow();
             if (filaSeleccionada == -1) {
@@ -142,27 +145,27 @@ public class VentanaPrincipal extends JFrame {
                 try {
                     int idEmpleado = (int) tableModel.getValueAt(filaSeleccionada, 0);
                     
-                    // Llamada al DAO real
+                    // Llamamos al método eliminar del DAO
                     boolean eliminado = empleadoDAO.eliminar(idEmpleado);
                     
                     if (eliminado) {
                         JOptionPane.showMessageDialog(this, "Empleado eliminado correctamente.");
-                        cargarEmpleadosDesdeBD();
+                        cargarEmpleadosDesdeBD(); // Recargamos la tabla para que se note el cambio
                     } else {
                         JOptionPane.showMessageDialog(this, "No se pudo encontrar el registro a eliminar.", "Aviso", JOptionPane.WARNING_MESSAGE);
                     }
                     
                 } catch (SQLException ex) {
-                    // Manejo de errores de base de datos sin mostrar stacktrace al usuario
                     JOptionPane.showMessageDialog(this, "Error en la base de datos al intentar eliminar el registro.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
         
-        // Cargar datos reales al iniciar la ventana
+        // Cargamos los datos apenas arranca la ventana
         cargarEmpleadosDesdeBD();
     }
 
+    // Método auxiliar para darle diseño bonito a los botones
     private JButton crearBotonEstilizado(String texto, Color colorFondo, Color colorHover) {
         JButton boton = new JButton(texto);
         boton.setFont(new Font("Segoe UI", Font.BOLD, 13));
@@ -176,6 +179,7 @@ public class VentanaPrincipal extends JFrame {
         ));
         boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
+        // Cambia de color cuando pasas el mouse encima
         boton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 boton.setBackground(colorHover);
@@ -188,9 +192,9 @@ public class VentanaPrincipal extends JFrame {
         return boton;
     }
 
-    // Método para consultar al DAO y poblar la JTable con los datos de MySQL
+    // Método para traer todos los registros de MySQL y rellenar la tabla de la interfaz
     public void cargarEmpleadosDesdeBD() {
-        tableModel.setRowCount(0); // Limpiar tabla actual
+        tableModel.setRowCount(0); // Limpiamos la tabla primero para evitar duplicados
         try {
             List<Empleado> lista = empleadoDAO.listarTodos();
             for (Empleado emp : lista) {
@@ -200,7 +204,7 @@ public class VentanaPrincipal extends JFrame {
                     emp.getDepartamento(), 
                     emp.getSalario(), 
                     emp.getFechaContratacion(), 
-                    emp.isActivo() ? "Activo" : "Inactivo"
+                    emp.isActivo() ? "Activo" : "Inactivo" // Convertimos el booleano a texto legible
                 });
             }
         } catch (SQLException e) {

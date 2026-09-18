@@ -33,7 +33,6 @@ public class FormularioEmpleado extends JFrame {
         setLocationRelativeTo(parent);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         
-        // --- ESTILO OSCURO PARA EL FORMULARIO ---
         // Panel principal con borde y color de fondo oscuro
         JPanel panelPrincipal = new JPanel();
         panelPrincipal.setLayout(new GridLayout(6, 2, 10, 15));
@@ -91,11 +90,11 @@ public class FormularioEmpleado extends JFrame {
         panelPrincipal.add(lblActivo);
         chkActivo = new JCheckBox();
         chkActivo.setSelected(true);
-        chkActivo.setBackground(new Color(17, 24, 39)); // Fondo oscuro para que se funda
+        chkActivo.setBackground(new Color(17, 24, 39)); 
         chkActivo.setForeground(Color.WHITE);
         panelPrincipal.add(chkActivo);
 
-        // Estilo del botón Guardar (parecido al botón Nuevo)
+        // Estilo del botón Guardar 
         btnGuardar = new JButton("Guardar");
         btnGuardar.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnGuardar.setBackground(new Color(16, 185, 129));
@@ -140,7 +139,7 @@ public class FormularioEmpleado extends JFrame {
             String fechaStr = txtFecha.getText().trim();
             boolean activo = chkActivo.isSelected();
 
-            // 1. Validaciones previas
+            // 1. Validaciones
             if (nombre.isEmpty() || depto.isEmpty() || salarioStr.isEmpty() || fechaStr.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios.", "Validación", JOptionPane.WARNING_MESSAGE);
                 return;

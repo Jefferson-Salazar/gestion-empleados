@@ -1,6 +1,7 @@
 package edu.umg.programacion2.modelo;
 
 public class Empleado {
+    // Aquí van los datos del empleado tal cual los guarda la base de datos
     private int id;
     private String nombreCompleto;
     private String departamento;
@@ -8,6 +9,7 @@ public class Empleado {
     private String fechaContratacion;
     private boolean activo;
 
+    // Este constructor se usa cuando creamos uno nuevo (sin ID porque la BD se lo pone solito)
     public Empleado(String nombreCompleto, String departamento, double salario, String fechaContratacion, boolean activo) {
         this.nombreCompleto = nombreCompleto;
         this.departamento = departamento;
@@ -15,7 +17,9 @@ public class Empleado {
         this.fechaContratacion = fechaContratacion;
         this.activo = activo;
     }
- public Empleado(int id, String nombreCompleto, String departamento, double salario, String fechaContratacion, boolean activo) {
+    
+    // Este otro se usa cuando lo traemos de la BD (aquí sí lleva ID porque ya existe en la tabla)
+    public Empleado(int id, String nombreCompleto, String departamento, double salario, String fechaContratacion, boolean activo) {
         this.id = id;
         this.nombreCompleto = nombreCompleto;
         this.departamento = departamento;
@@ -24,6 +28,7 @@ public class Empleado {
         this.activo = activo;
     }
 
+    // Getters para poder consultar los datos desde el DAO o las ventanas
     public int getId() { return id; }
     public String getNombreCompleto() { return nombreCompleto; }
     public String getDepartamento() { return departamento; }
