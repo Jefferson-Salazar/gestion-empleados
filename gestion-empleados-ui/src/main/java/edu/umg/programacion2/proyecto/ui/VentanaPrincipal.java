@@ -47,8 +47,8 @@ public class VentanaPrincipal extends JFrame {
         lblTitulo.setForeground(new Color(241, 245, 249)); 
         panelNorte.add(lblTitulo);
 
-        // TABLA: Definimos columnas y evitamos que se puedan editar directamente haciendo clic en las celdas
-        String[] columnas = {"ID", "Nombre Completo", "Departamento", "Salario (Q)", "Contratación", "Estado"};
+        // TABLA: Definimos las 7 columnas incluyendo Tipo Contrato y evitamos que se puedan editar directamente
+        String[] columnas = {"ID", "Nombre Completo", "Departamento", "Salario (Q)", "Contratación", "Estado", "Tipo Contrato"};
         tableModel = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -109,14 +109,14 @@ public class VentanaPrincipal extends JFrame {
                 return;
             }
 
-            // Capturamos los valores de cada columna de la fila seleccionada
+            // Capturamos los valores de las 7 columnas de la fila seleccionada
             int id = (int) tableModel.getValueAt(filaSeleccionada, 0);
             String nombre = (String) tableModel.getValueAt(filaSeleccionada, 1);
             String depto = (String) tableModel.getValueAt(filaSeleccionada, 2);
             double salario = Double.parseDouble(tableModel.getValueAt(filaSeleccionada, 3).toString());
             String fecha = (String) tableModel.getValueAt(filaSeleccionada, 4);
             boolean activo = tableModel.getValueAt(filaSeleccionada, 5).toString().equals("Activo");
-            String tipoContrato = (String)tableModel.getValueAt(filaSeleccionada, 6);
+            String tipoContrato = (String) tableModel.getValueAt(filaSeleccionada, 6); // Columna 6 corregida
 
             // Creamos el objeto con esos datos
             Empleado empSeleccionado = new Empleado(id, nombre, depto, salario, fecha, activo, tipoContrato);
@@ -193,7 +193,7 @@ public class VentanaPrincipal extends JFrame {
         return boton;
     }
 
-    // Método para traer todos los registros de MySQL y rellenar la tabla de la interfaz
+    // Método para traer todos los registros de MySQL y rellenar la tabla de la interfaz con sus 7 columnas
     public void cargarEmpleadosDesdeBD() {
         tableModel.setRowCount(0); // Limpiamos la tabla primero para evitar duplicados
         try {
@@ -205,7 +205,8 @@ public class VentanaPrincipal extends JFrame {
                     emp.getDepartamento(), 
                     emp.getSalario(), 
                     emp.getFechaContratacion(), 
-                    emp.isActivo() ? "Activo" : "Inactivo" // Convertimos el booleano a texto legible
+                    emp.isActivo() ? "Activo" : "Inactivo", // Convertimos el booleano a texto legible
+                    emp.getTipoContrato() // <-- Se agrega el tipo de contrato en la última columna
                 });
             }
         } catch (SQLException e) {

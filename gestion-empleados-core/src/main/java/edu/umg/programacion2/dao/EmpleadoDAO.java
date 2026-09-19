@@ -20,7 +20,7 @@ public class EmpleadoDAO {
 
     // 1. Guardar un empleado nuevo en la base de datos
     public Empleado crear(Empleado empleado) throws SQLException {
-        String sql = "INSERT INTO empleados (nombre_completo, departamento, salario, fecha_contratacion, activo) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO empleados (nombre_completo, departamento, salario, fecha_contratacion, activo, tipo_contrato) VALUES (?, ?, ?, ?, ?, ?)";
         
         // El try-with-resources cierra la conexión solo para que no gaste memoria
         try (Connection conn = conectar();
@@ -41,7 +41,7 @@ public class EmpleadoDAO {
             try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     int idGenerado = generatedKeys.getInt(1);
-                    return new Empleado(idGenerado, empleado.getNombreCompleto(), empleado.getDepartamento(), empleado.getSalario(), empleado.getFechaContratacion(), empleado.isActivo(),empleado.getTipoContrato());
+                    return new Empleado(idGenerado, empleado.getNombreCompleto(), empleado.getDepartamento(), empleado.getSalario(), empleado.getFechaContratacion(), empleado.isActivo(), empleado.getTipoContrato());
                 }
             }
         }
@@ -51,7 +51,7 @@ public class EmpleadoDAO {
     // 2. Traer a todos los empleados de la tabla en una lista
     public List<Empleado> listarTodos() throws SQLException {
         List<Empleado> empleados = new ArrayList<>();
-        String sql = "SELECT id, nombre_completo, departamento, salario, fecha_contratacion, activo FROM empleados";
+        String sql = "SELECT id, nombre_completo, departamento, salario, fecha_contratacion, activo, tipo_contrato FROM empleados";
         
         // Consultamos y recorremos fila por fila el resultado que nos devuelve la base
         try (Connection conn = conectar();
@@ -75,7 +75,7 @@ public class EmpleadoDAO {
 
     // 3. Buscar un empleado específico por su ID
     public Optional<Empleado> buscarPorId(int id) throws SQLException {
-        String sql = "SELECT id, nombre_completo, departamento, salario, fecha_contratacion, activo FROM empleados WHERE id = ?";
+        String sql = "SELECT id, nombre_completo, departamento, salario, fecha_contratacion, activo, tipo_contrato FROM empleados WHERE id = ?";
         try (Connection conn = conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
@@ -102,7 +102,7 @@ public class EmpleadoDAO {
 
     // 4. Actualizar los datos de un empleado que ya existe usando su ID
     public boolean actualizar(Empleado empleado) throws SQLException {
-        String sql = "UPDATE empleados SET nombre_completo = ?, departamento = ?, salario = ?, fecha_contratacion = ?, activo = ? WHERE id = ?";
+        String sql = "UPDATE empleados SET nombre_completo = ?, departamento = ?, salario = ?, fecha_contratacion = ?, activo = ?, tipo_contrato = ? WHERE id = ?";
         try (Connection conn = conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
@@ -111,7 +111,8 @@ public class EmpleadoDAO {
             stmt.setDouble(3, empleado.getSalario());
             stmt.setString(4, empleado.getFechaContratacion());
             stmt.setBoolean(5, empleado.isActivo());
-            stmt.setInt(6, empleado.getId());
+            stmt.setString(6, empleado.getTipoContrato());
+            stmt.setInt(7, empleado.getId());
             
             // Si esto es mayor a 0 significa que sí se actualizó el registro
             int filasAfectadas = stmt.executeUpdate();
