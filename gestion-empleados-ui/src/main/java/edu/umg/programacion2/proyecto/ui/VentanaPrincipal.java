@@ -94,6 +94,7 @@ public class VentanaPrincipal extends JFrame {
         panelSur.add(btnEliminar);
 
         // ACCIONES DE LOS BOTONES
+        
 
         // 1. Botón Nuevo: Abre el formulario vacío para registrar un empleado
         btnNuevo.addActionListener(e -> {
@@ -162,8 +163,48 @@ public class VentanaPrincipal extends JFrame {
             }
         });
         
+        //4. Botón Ver Totales
+        
+        JButton btnVerTotales = crearBotonEstilizado("Ver Totales", new Color(139, 92, 246), new Color(167, 139, 250));
+        panelSur.add(btnVerTotales);
+        
         // Cargamos los datos apenas arranca la ventana
         cargarEmpleadosDesdeBD();
+        
+        btnVerTotales.addActionListener(e -> {
+            try {
+                List<Empleado> lista = empleadoDAO.listarTodos();
+
+                // Lista vaciaa
+                if (lista == null || lista.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "No hay empleados registrados para calcular totales.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+
+                double sumaSalarios = 0.0;
+                int cantidadEmpleados = lista.size();
+
+                // Recorremos la lista manualmente
+                for (Empleado emp : lista) {
+                    sumaSalarios += emp.getSalario();
+                }
+
+                // Calculamos el promedio manualmente
+                double promedioSalarios = sumaSalarios / cantidadEmpleados;
+
+                // Mostramos el resultado en un cuadro de diálogo
+                String mensaje = String.format("   REPORTE DE SALARIOS   \n\n" +
+                                               "Total de empleados: %d\n" +
+                                               "Suma total de salarios: Q. %.2f\n" +
+                                               "Promedio de salarios: Q. %.2f", 
+                                               cantidadEmpleados, sumaSalarios, promedioSalarios);
+
+                JOptionPane.showMessageDialog(this, mensaje, "Totales y Promedios", JOptionPane.INFORMATION_MESSAGE);
+
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Error al conectar con la base de datos para calcular los totales.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
     }
 
     // Método auxiliar para darle diseño bonito a los botones
