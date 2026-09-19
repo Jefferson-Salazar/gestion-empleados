@@ -32,6 +32,7 @@ public class EmpleadoDAO {
             stmt.setDouble(3, empleado.getSalario());
             stmt.setString(4, empleado.getFechaContratacion());
             stmt.setBoolean(5, empleado.isActivo());
+            stmt.setString(6, empleado.getTipoContrato());
             
             // Ejecutamos el comando de guardar
             stmt.executeUpdate();
@@ -40,7 +41,7 @@ public class EmpleadoDAO {
             try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     int idGenerado = generatedKeys.getInt(1);
-                    return new Empleado(idGenerado, empleado.getNombreCompleto(), empleado.getDepartamento(), empleado.getSalario(), empleado.getFechaContratacion(), empleado.isActivo());
+                    return new Empleado(idGenerado, empleado.getNombreCompleto(), empleado.getDepartamento(), empleado.getSalario(), empleado.getFechaContratacion(), empleado.isActivo(),empleado.getTipoContrato());
                 }
             }
         }
@@ -64,7 +65,8 @@ public class EmpleadoDAO {
                   rs.getString("departamento"),
                   rs.getDouble("salario"),
                   rs.getString("fecha_contratacion"),
-                  rs.getBoolean("activo")
+                  rs.getBoolean("activo"),
+                  rs.getString("tipo_contrato")
               ));
           }
       }
@@ -88,7 +90,8 @@ public class EmpleadoDAO {
                         rs.getString("departamento"),
                         rs.getDouble("salario"),
                         rs.getString("fecha_contratacion"),
-                        rs.getBoolean("activo")
+                        rs.getBoolean("activo"),
+                        rs.getString("tipo_contrato")
                     );
                     return Optional.of(e);
                 }
