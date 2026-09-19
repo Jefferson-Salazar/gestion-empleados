@@ -8,7 +8,8 @@ public class Empleado {
     private double salario;
     private String fechaContratacion;
     private boolean activo;
-
+    private String tipoContrato;
+    
     // Este constructor se usa cuando creamos uno nuevo (sin ID porque la BD se lo pone solito)
     public Empleado(String nombreCompleto, String departamento, double salario, String fechaContratacion, boolean activo) {
         this.nombreCompleto = nombreCompleto;
