@@ -16,6 +16,7 @@ public class FormularioEmpleado extends JFrame {
     private JComboBox<String> cmbDepartamento;
     private JTextField txtSalario;
     private JTextField txtFecha;
+    private JComboBox<String> cmbTipoContrato; // <-- Declarado aquí
     private JCheckBox chkActivo;
     private JButton btnGuardar;
     
@@ -29,18 +30,18 @@ public class FormularioEmpleado extends JFrame {
         this.empleadoDAO = dao;
         this.empleadoEditando = empleado;
 
-        setSize(450, 400);
+        setSize(450, 450); // Ajustado un poco más de alto para el nuevo campo
         setLocationRelativeTo(parent);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         
-        // Panel principal con borde y color de fondo oscuro
+        // Panel principal con borde y color de fondo oscuro (Cambiado a 7 filas para acomodar el nuevo combo)
         JPanel panelPrincipal = new JPanel();
-        panelPrincipal.setLayout(new GridLayout(6, 2, 10, 15));
+        panelPrincipal.setLayout(new GridLayout(7, 2, 10, 15));
         panelPrincipal.setBackground(new Color(17, 24, 39)); // Mismo fondo que la tabla
         panelPrincipal.setBorder(new EmptyBorder(20, 20, 20, 20));
         setContentPane(panelPrincipal);
 
-        // Método auxiliar para crear etiquetas blancas
+        // Nombre
         JLabel lblNombre = crearEtiquetaBlanca(" Nombre Completo:");
         panelPrincipal.add(lblNombre);
         txtNombre = new JTextField();
@@ -53,15 +54,17 @@ public class FormularioEmpleado extends JFrame {
         ));
         panelPrincipal.add(txtNombre);
 
+        // Departamento
         JLabel lblDepto = crearEtiquetaBlanca(" Departamento:");
         panelPrincipal.add(lblDepto);
         String[] departamentos = {"Ventas", "Sistemas", "Contabilidad", "Recursos Humanos", "Administración"};
         cmbDepartamento = new JComboBox<>(departamentos);
-        cmbDepartamento.setEditable(true); // Hace que se pueda escribir texto libre
+        cmbDepartamento.setEditable(true); 
         cmbDepartamento.setBackground(new Color(31, 41, 55));
         cmbDepartamento.setForeground(Color.WHITE);
         panelPrincipal.add(cmbDepartamento);
 
+        // Salario
         JLabel lblSalario = crearEtiquetaBlanca(" Salario Mensual (Q):");
         panelPrincipal.add(lblSalario);
         txtSalario = new JTextField();
@@ -74,6 +77,7 @@ public class FormularioEmpleado extends JFrame {
         ));
         panelPrincipal.add(txtSalario);
 
+        // Fecha
         JLabel lblFecha = crearEtiquetaBlanca(" Contratación (YYYY-MM-DD):");
         panelPrincipal.add(lblFecha);
         txtFecha = new JTextField();
@@ -86,6 +90,16 @@ public class FormularioEmpleado extends JFrame {
         ));
         panelPrincipal.add(txtFecha);
 
+        // === NUEVO: Tipo de Contrato (Selección Fija) ===
+        JLabel lblContrato = crearEtiquetaBlanca(" Tipo de Contrato:");
+        panelPrincipal.add(lblContrato);
+        String[] tiposContrato = {"Temporal", "Permanente", "Por hora"};
+        cmbTipoContrato = new JComboBox<>(tiposContrato);
+        cmbTipoContrato.setBackground(new Color(31, 41, 55));
+        cmbTipoContrato.setForeground(Color.WHITE);
+        panelPrincipal.add(cmbTipoContrato);
+
+        // Activo
         JLabel lblActivo = crearEtiquetaBlanca(" ¿Activo?");
         panelPrincipal.add(lblActivo);
         chkActivo = new JCheckBox();
@@ -109,20 +123,20 @@ public class FormularioEmpleado extends JFrame {
         panelPrincipal.add(new JLabel()); // Espacio vacío para alinear
         panelPrincipal.add(btnGuardar);
 
-        // Si estamos editando, rellenamos los campos
+        // Si estamos editando, rellenamos los campos (incluyendo el tipo de contrato)
         if (empleadoEditando != null) {
             txtNombre.setText(empleadoEditando.getNombreCompleto());
             cmbDepartamento.setSelectedItem(empleadoEditando.getDepartamento());
             txtSalario.setText(String.valueOf(empleadoEditando.getSalario()));
             txtFecha.setText(empleadoEditando.getFechaContratacion());
             chkActivo.setSelected(empleadoEditando.isActivo());
+            cmbTipoContrato.setSelectedItem(empleadoEditando.getTipoContrato()); // <-- Carga la opción guardada
         }
 
         // Evento del botón Guardar
         btnGuardar.addActionListener(e -> guardarDatos());
     }
 
-    // Método auxiliar para no repetir código de estilo en los JLabel
     private JLabel crearEtiquetaBlanca(String texto) {
         JLabel label = new JLabel(texto);
         label.setForeground(new Color(229, 231, 235));
@@ -133,15 +147,23 @@ public class FormularioEmpleado extends JFrame {
     private void guardarDatos() {
         try {
             String nombre = txtNombre.getText().trim();
-            // Obtenemos el texto del JComboBox, ya sea seleccionado o escrito
             String depto = cmbDepartamento.getSelectedItem() != null ? cmbDepartamento.getSelectedItem().toString().trim() : "";
             String salarioStr = txtSalario.getText().trim();
             String fechaStr = txtFecha.getText().trim();
             boolean activo = chkActivo.isSelected();
+            
+            // Obtener y validar el tipo de contrato seleccionado
+            String tipoContrato = cmbTipoContrato.getSelectedItem() != null ? cmbTipoContrato.getSelectedItem().toString() : "";
 
-            // 1. Validaciones
+            // 1. Validaciones generales
             if (nombre.isEmpty() || depto.isEmpty() || salarioStr.isEmpty() || fechaStr.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios.", "Validación", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // Validar que se haya seleccionado un tipo de contrato
+            if (tipoContrato.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Debe seleccionar un tipo de contrato válido.", "Validación", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
@@ -166,25 +188,23 @@ public class FormularioEmpleado extends JFrame {
                 return;
             }
 
-            // Validar que no sea una fecha futura
             if (fechaContratacion.isAfter(LocalDate.now())) {
                 JOptionPane.showMessageDialog(this, "La fecha de contratación no puede ser una fecha futura.", "Validación", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            // Validar que el año sea lógico (del año 2000 en adelante)
             if (fechaContratacion.getYear() < 2000) {
                 JOptionPane.showMessageDialog(this, "El año de contratación no es válido. Debe ser del año 2000 en adelante.", "Validación", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            // 2. Operación contra el DAO
+            // 2. Operación contra el DAO (pasando el tipoContrato al final)
             if (empleadoEditando == null) {
-                Empleado nuevo = new Empleado(nombre, depto, salario, fechaStr, activo);
+                Empleado nuevo = new Empleado(nombre, depto, salario, fechaStr, activo, tipoContrato);
                 empleadoDAO.crear(nuevo);
                 JOptionPane.showMessageDialog(this, "Empleado registrado exitosamente.");
             } else {
-                empleadoEditando = new Empleado(empleadoEditando.getId(), nombre, depto, salario, fechaStr, activo);
+                empleadoEditando = new Empleado(empleadoEditando.getId(), nombre, depto, salario, fechaStr, activo, tipoContrato);
                 empleadoDAO.actualizar(empleadoEditando);
                 JOptionPane.showMessageDialog(this, "Empleado actualizado correctamente.");
             }

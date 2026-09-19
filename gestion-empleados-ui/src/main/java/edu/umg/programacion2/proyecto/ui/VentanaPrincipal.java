@@ -116,9 +116,10 @@ public class VentanaPrincipal extends JFrame {
             double salario = Double.parseDouble(tableModel.getValueAt(filaSeleccionada, 3).toString());
             String fecha = (String) tableModel.getValueAt(filaSeleccionada, 4);
             boolean activo = tableModel.getValueAt(filaSeleccionada, 5).toString().equals("Activo");
+            String tipoContrato = (String)tableModel.getValueAt(filaSeleccionada, 6);
 
             // Creamos el objeto con esos datos
-            Empleado empSeleccionado = new Empleado(id, nombre, depto, salario, fecha, activo);
+            Empleado empSeleccionado = new Empleado(id, nombre, depto, salario, fecha, activo, tipoContrato);
 
             // Abrimos el formulario pero pasándole el empleado (modo edición)
             FormularioEmpleado form = new FormularioEmpleado(this, empleadoDAO, empSeleccionado);
